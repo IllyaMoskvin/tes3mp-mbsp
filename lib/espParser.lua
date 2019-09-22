@@ -18,15 +18,13 @@
         5. Change the "files" table a couple lines down to match your files
         (6. Check the espParserTest.lua file for examples)
 
+    ~~~~~~~~
+
+    Modified by Illya Moskvin to remove dependency on TES3MP.
+    No modifications were made to the description above.
 ]]
 
-local files = {
-    "Morrowind.esm",
-    "Tribunal.esm",
-    "Bloodmoon.esm"
-}
-
-require "custom.struct" -- Requires https://github.com/iryont/lua-struct
+require "struct" -- Requires https://github.com/iryont/lua-struct
 
 --Global
 espParser = {}
@@ -372,12 +370,8 @@ end
 espParser.addEsp = function(filename)
     local currentFile = filename
 
-    --print(tes3mp.GetDataPath() .. "\\custom\\esps\\" .. currentFile)
-    local f
-    f = io.open(tes3mp.GetDataPath() .. "\\custom\\esps\\" .. currentFile, "rb") --open file handler (windows)
-    if f == nil then
-        f = io.open(tes3mp.GetDataPath() .. "/custom/esps/" .. currentFile, "rb") --open file handler (linux)
-    end
+    -- it's up to the user to ensure their paths match their operating system
+    local f = io.open(currentFile, "rb")
 
     if f == nil then return false end --could not open the file
 
@@ -394,14 +388,3 @@ espParser.addEsp = function(filename)
 
     return true
 end
-
--- Load all the files in the config
-tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loading files...")
-for i,name in pairs(files) do
-    if espParser.addEsp(name) then
-        tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Loaded: " .. name)
-    else
-        tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Failed to load: " .. name)
-    end
-end
-tes3mp.LogMessage(enumerations.log.INFO, "[espParser] Finished!")
