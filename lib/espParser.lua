@@ -24,7 +24,8 @@
     No modifications were made to the description above.
 ]]
 
-require "struct" -- Requires https://github.com/iryont/lua-struct
+-- Add this to whatever requires espParser
+-- require("lib.struct") -- Requires https://github.com/iryont/lua-struct
 
 --Global
 espParser = {}
