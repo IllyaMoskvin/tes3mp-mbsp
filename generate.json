@@ -1,0 +1,15 @@
+{
+    "directories": [
+        "/path/to/your/Data Files",
+        "/path/to/another/data",
+        "C:\\if\\you\\use\\Windows\\use\\Windows\\paths"
+    ],
+    "files": [
+        "/path/to/some/random/mod.esp",
+        "/path/to/another/random/mod.omwaddon",
+        "/this/is/an/alternative/to/using/directories/above.esp",
+        "/both/will/be/loaded.esm",
+        "/no/need/to/include/individual/mods/here/if/their/directories/are/already/included/above.esp",
+        "D:\\be\\sure\\to\\use\\Windows\\paths.esm"
+    ]
+}
