@@ -17,13 +17,6 @@ function exists(file)
    return ok, err
 end
 
--- Check if a directory exists in this path
--- https://stackoverflow.com/a/40195356
-function isdir(path)
-   -- "/" works on both Unix and Windows
-   return exists(path.."/")
-end
-
 -- Get contents of file
 -- https://stackoverflow.com/a/31857671
 local function readfile(path)
@@ -46,14 +39,6 @@ local config = dkjson.decode(readfile("generate.json"))
 if config == nil then
     print("Failed to read generate.json")
     os.exit(1)
-end
-
--- Verify that the directories exist
-for i, dir in pairs(config['directories']) do
-    if not isdir(dir) then
-        print("Directory not found or is not a directory: ", dir)
-        os.exit(1)
-    end
 end
 
 -- Verify that the files exist
