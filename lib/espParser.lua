@@ -64,11 +64,6 @@ function espParser.Record:create(stream)
     setmetatable(newobj, espParser.Record)
     newobj.name = stream:read(4)
 
-    -- We only care about spells in this case!
-    if tostring(newobj.name) ~= "SPEL" then
-        return nil
-    end
-
     newobj.size = struct.unpack( "i", stream:read(4) )
     newobj.header1 = struct.unpack( "i", stream:read(4) )
     newobj.flags = struct.unpack( "i", stream:read(4) )
@@ -81,12 +76,17 @@ function espParser.Record:create(stream)
         table.insert(newobj.subRecords, espParser.SubRecord:create(st) )
     end
 
+    -- We only care about saving spells in this case!
+    if tostring(newobj.name) ~= "SPEL" then
+        return nil
+    end
+
     return newobj
 end
 function espParser.Record:getSubRecordsByName(name)
     local out = {}
     for _, subrecord in pairs(self.subRecords) do
-        if subrecord.name == name then
+        if tostring(subrecord.name) == name then
             table.insert(out, subrecord)
         end
     end
@@ -120,9 +120,9 @@ end
 espParser.getSubRecords = function(filename, recordName, subRecordName)
     local out = {}
     for _,record in pairs(espParser.rawFiles[filename]) do
-        if record.name == recordName then
+        if tostring(record.name) == recordName then
             for _, subrecord in pairs(record.subRecords) do
-                if subrecord.name == subRecordName then
+                if tostring(subrecord.name) == subRecordName then
                     table.insert(out, subrecord)
                 end
             end
