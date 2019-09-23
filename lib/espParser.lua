@@ -21,6 +21,7 @@
     ~~~~~~~~
 
     Modified by Illya Moskvin to remove dependency on TES3MP.
+    Further modified to only extract "SPEL" records.
     No modifications were made to the description above.
 ]]
 
@@ -62,6 +63,12 @@ function espParser.Record:create(stream)
     local newobj = {}
     setmetatable(newobj, espParser.Record)
     newobj.name = stream:read(4)
+
+    -- We only care about spells in this case!
+    if tostring(newobj.name) ~= "SPEL" then
+        return nil
+    end
+
     newobj.size = struct.unpack( "i", stream:read(4) )
     newobj.header1 = struct.unpack( "i", stream:read(4) )
     newobj.flags = struct.unpack( "i", stream:read(4) )
@@ -103,7 +110,7 @@ end
 espParser.getRecords = function(filename, recordName)
     local out = {}
     for i,record in pairs(espParser.rawFiles[filename]) do
-        if record.name == recordName then
+        if tostring(record.name) == recordName then
             table.insert(out, record)
         end
     end
@@ -190,9 +197,11 @@ espParser.addEsp = function(filename)
     espParser.rawFiles[currentFile] = {}
     while mainStream.pointer < mainStream:len() do
         local r = espParser.Record:create(mainStream)
-        table.insert(espParser.rawFiles[currentFile], r)
-    end
 
+        if r ~= nil then
+            table.insert(espParser.rawFiles[currentFile], r)
+        end
+    end
 
     return true
 end
