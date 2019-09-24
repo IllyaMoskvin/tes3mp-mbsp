@@ -21,13 +21,6 @@ local function info(msg)
    tes3mp.LogMessage(enumerations.log.INFO, logPrefix .. msg)
 end
 
-local msg = function(pid, text)
-    if text == nil then
-        text = ""
-    end
-    tes3mp.SendMessage(pid, color.GreenYellow .. "[mbsp] " .. color.Default .. text .. "\n" .. color.Default)
-end
-
 -- https://stackoverflow.com/a/23535333
 local getScriptPath = function()
    local str = debug.getinfo(2, "S").source:sub(2)
