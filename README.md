@@ -45,13 +45,30 @@ Consider using MBSP-TES3MP alongside [NCGD-TES3MP](https://github.com/hristoast/
 
  5. Create the `CoreScripts/data/custom/__data_mbsp.json` spell cost look-up file. Do one of the following:
 
-    a. If you are running vanilla (Morrowind, Tribunal, Bloodmoon), copy `spells/vanilla.json` into `__data_mbsp.json`.
+    a. If you are running vanilla (Morrowind, Tribunal, Bloodmoon), you shouldn't need to do anything.
 
     b. If you are running vanilla + Tamriel Rebuilt (v18.09), copy `spells/tr-v18.09.json` into `__data_mbsp.json`.
 
     c. If you are running other mods that add spells, see below.
 
  6. (Optional) Run the server once to generate `CoreScripts/data/custom/__config_mbsp.json`. See Configuration.
+
+
+## Known Issues
+
+Please feel free to [open an issue](https://github.com/IllyaMoskvin/mbsp-tes3mp/issues) if you encounter a bug or have ideas about how to fix some of the ones in this list:
+
+ * Developed with TES3MP [v0.7.0-alpha](https://github.com/TES3MP/openmw-tes3mp/releases/tag/0.7.0-alpha), commit hash: 292536439e. Only the most recent version of TES3MP will be supported. If a new version comes out and this mod is incompatible with it, please open an issue.
+
+ * Scripted spell mods will not be supported. There's too much variation in how scripted spells might be implemented.
+
+ * Unlike [Magicka Mastery](https://www.nexusmods.com/morrowind/mods/45058), this mod cannot award experience for failed spells. If you can figure out a way to do this cleanly, or at least in a way that doesn't impact performance too much, please [submit a pull request](https://github.com/IllyaMoskvin/mbsp-tes3mp/pulls).
+
+ * When the script awards extra skill progress, it's possible that the player will end up with more than 100% progress needed to trigger a skill increase. The skill increase will happen the next time the player gains progress in that skill.
+
+ * Extra skill progress does not roll over when the skill is increased. It gets reset back to zero.
+
+ * If casting a spell causes the skill to be increased, that spell will not not be eligible for cost reduction and will not grant additional experience. (Unlike the two above, this bug seems fixable.)
 
 
 ## Credits
