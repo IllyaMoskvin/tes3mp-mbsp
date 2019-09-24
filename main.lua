@@ -28,6 +28,21 @@ local msg = function(pid, text)
     tes3mp.SendMessage(pid, color.GreenYellow .. "[mbsp] " .. color.Default .. text .. "\n" .. color.Default)
 end
 
+-- https://stackoverflow.com/a/23535333
+local getScriptPath = function()
+   local str = debug.getinfo(2, "S").source:sub(2)
+   return str:match("(.*[/\\])")
+end
+
+-- https://stackoverflow.com/a/31857671
+local function readfile(path)
+    local file = io.open(path, "rb") -- r read mode and b binary mode
+    if not file then return nil end
+    local content = file:read "*a" -- *a or *all reads the whole file
+    file:close()
+    return content
+end
+
 -- We only care about skills that consume magicka when used
 local trackedSkillNames = {
    "Destruction",
@@ -43,6 +58,32 @@ local trackedSkills = {}
 
 for i, skillName in ipairs(trackedSkillNames) do
     trackedSkills[skillName] = tes3mp.GetSkillId(skillName)
+end
+
+-- Load pre-generated list of spells from plugins
+local pluginSpellFile = tes3mp.GetDataPath() .. "/" .. DataManager.getDataPath(dataName)
+local pluginSpellFileFallback = getScriptPath() .. 'spells/vanilla.json'
+
+if not tes3mp.DoesFilePathExist(pluginSpellFile) then
+    warn('Missing ' .. pluginSpellFile)
+    warn('Attempting fall-back to vanilla spell list...')
+
+    if not tes3mp.DoesFilePathExist(pluginSpellFileFallback) then
+        fatal('Missing ' .. pluginSpellFileFallback)
+        fatal('Please see the mbsp-tes3mp readme for more info')
+        tes3mp.StopServer()
+    end
+
+    local dkjson = require('dkjson')
+    DataManager.saveData(dataName, dkjson.decode(readfile(pluginSpellFileFallback)))
+end
+
+local pluginSpells = DataManager.loadData('mbsp', {})
+
+if next(pluginSpells) == nil then
+    fatal('Failed to read spell data file. Please file an issue:')
+    fatal('https://github.com/IllyaMoskvin/mbsp-tes3mp/issues')
+    tes3mp.StopServer()
 end
 
 -- Based off JakobCh's `customSpells` example:
@@ -74,15 +115,27 @@ local getSkillThatsChanged = function(pid)
     return changedSkillId, changedSkillName, changedSkillAmount
 end
 
+local getSpellCost = function(spellId)
+    local spellCost
+
+    -- Check the lookup table
+    spellCost = pluginSpells[spellId]
+    if spellCost ~= nil then
+        return spellCost
+    end
+
+    return nil
+end
+
 customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
     local skillId, skillName, skillAmount = getSkillThatsChanged(pid)
     if skillId == nil then return end
     if skillName == nil then return end
     if skillAmount == nil then return end
 
-    local selectedSpell = Players[pid].data.miscellaneous.selectedSpell
-    msg(pid, selectedSpell)
+    local selectedSpellId = Players[pid].data.miscellaneous.selectedSpell
+    local selectedSpellCost = getSpellCost(selectedSpellId)
 
-    msg(pid, skillName)
-    msg(pid, skillAmount)
+    info('PID #' .. pid .. ' cast "' .. selectedSpellId .. '" with base cost ' .. selectedSpellCost )
+    info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillAmount )
 end)
