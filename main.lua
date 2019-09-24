@@ -60,6 +60,16 @@ for i, skillName in ipairs(trackedSkillNames) do
     trackedSkills[skillName] = tes3mp.GetSkillId(skillName)
 end
 
+-- Load custom spells from TES3MP's recordstore
+local customSpells = {}
+local customSpellData = jsonInterface.load('recordstore/spell.json')
+
+if customSpellData ~= nil then
+    for spellId, spellData in pairs(customSpellData['generatedRecords']) do
+        customSpells[spellId] = spellData['cost']
+    end
+end
+
 -- Load pre-generated list of spells from plugins
 local pluginSpellFile = tes3mp.GetDataPath() .. "/" .. DataManager.getDataPath(dataName)
 local pluginSpellFileFallback = getScriptPath() .. 'spells/vanilla.json'
@@ -117,6 +127,12 @@ end
 
 local getSpellCost = function(spellId)
     local spellCost
+
+    -- Check custom spells
+    spellCost = customSpells[spellId]
+    if spellCost ~= nil then
+        return spellCost
+    end
 
     -- Check the lookup table
     spellCost = pluginSpells[spellId]
