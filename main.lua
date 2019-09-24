@@ -95,30 +95,28 @@ end
 -- Based off JakobCh's `customSpells` example:
 -- https://github.com/JakobCh/tes3mp_scripts/blob/b8b79d6/customSpells/scripts/customSpells.lua#L38
 local getSkillThatsChanged = function(pid)
-    local Player = Players[pid]
-
-    if Player.data.skills == nil then return nil end
+    if Players[pid].data.skills == nil then return nil end
 
     local changedSkillId
     local changedSkillName
-    local changedSkillAmount
+    local changedSkillProgress
+    local changedSkillProgressDelta
 
     for skillName, skillId in pairs(trackedSkills) do
-        local skillData = Player.data.skills[skillName]
+        local skillData = Players[pid].data.skills[skillName]
         if skillData == nil then return nil end
-        local baseProgress = skillData.progress
-        local changedProgress = tes3mp.GetSkillProgress(pid, skillId)
+        local oldProgress = skillData.progress
+        local newProgress = tes3mp.GetSkillProgress(pid, skillId)
 
-        -- msg(pid, name .. ":" .. tostring(baseProgress) .. "/" .. changedProgress )
-
-        if baseProgress < changedProgress then
+        if oldProgress < newProgress then
             changedSkillId = skillId
             changedSkillName = skillName
-            changedSkillAmount = changedProgress - baseProgress
+            changedSkillProgress = newProgress
+            changedSkillProgressDelta = newProgress - oldProgress
         end
     end
 
-    return changedSkillId, changedSkillName, changedSkillAmount
+    return changedSkillId, changedSkillName, changedSkillProgress, changedSkillProgressDelta
 end
 
 local addRecentSpell = function(spellId, spellCost)
@@ -154,14 +152,30 @@ local getSpellCost = function(spellId)
 end
 
 customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
-    local skillId, skillName, skillAmount = getSkillThatsChanged(pid)
+    local skillId, skillName, skillProgress, skillProgressDelta = getSkillThatsChanged(pid)
     if skillId == nil then return end
     if skillName == nil then return end
-    if skillAmount == nil then return end
+    if skillProgress == nil then return end
+    if skillProgressDelta == nil then return end
 
     local selectedSpellId = Players[pid].data.miscellaneous.selectedSpell
     local selectedSpellCost = getSpellCost(selectedSpellId)
 
+    if selectedSpellCost == nil then return end
+
     info('PID #' .. pid .. ' cast "' .. selectedSpellId .. '" with base cost ' .. selectedSpellCost )
-    info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillAmount )
+    info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
+
+    -- Calculate how much additional progress to give
+    -- TODO: Make the `5` configurable!
+    local extraProgress = math.ceil(selectedSpellCost / 5 * skillProgressDelta) - skillProgressDelta
+    local newProgess = skillProgress + extraProgress
+
+    info('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress')
+
+    tes3mp.SetSkillProgress(pid, skillId, newProgess) -- save to memory
+    Players[pid].data.skills[skillName].progress = newProgess -- save to disk
+    tes3mp.SendSkills(pid) -- send to all clients
+
+    info('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
 end)
