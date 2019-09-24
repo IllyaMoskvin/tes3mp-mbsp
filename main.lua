@@ -60,6 +60,9 @@ for i, skillName in ipairs(trackedSkillNames) do
     trackedSkills[skillName] = tes3mp.GetSkillId(skillName)
 end
 
+-- Track recently used spells for performance
+local recentSpells = {}
+
 -- Load custom spells from TES3MP's recordstore
 local customSpells = {}
 local customSpellData = jsonInterface.load('recordstore/spell.json')
@@ -125,18 +128,32 @@ local getSkillThatsChanged = function(pid)
     return changedSkillId, changedSkillName, changedSkillAmount
 end
 
+local addRecentSpell = function(spellId, spellCost)
+    if recentSpells[spellId] == nil then
+        recentSpells[spellId] = spellCost
+    end
+end
+
 local getSpellCost = function(spellId)
     local spellCost
+
+    -- Check recently used spells
+    spellCost = recentSpells[spellId]
+    if spellCost ~= nil then
+        return spellCost
+    end
 
     -- Check custom spells
     spellCost = customSpells[spellId]
     if spellCost ~= nil then
+        addRecentSpell(spellId, spellCost)
         return spellCost
     end
 
     -- Check the lookup table
     spellCost = pluginSpells[spellId]
     if spellCost ~= nil then
+        addRecentSpell(spellId, spellCost)
         return spellCost
     end
 
