@@ -36,9 +36,15 @@ local function readfile(path)
     return content
 end
 
+-- Cache attribute ids for performance
+local willpowerAttributeId = tes3mp.GetAttributeId('Willpower')
+local luckAttributeId = tes3mp.GetAttributeId('Luck')
+
 -- TODO: Use DataManger to expose this config
 local config = {
     spellCostDivisor = 5,
+    willpowerPointsPerSkillPoint = 5,
+    luckPointsPerSkillPoint = 10,
 }
 
 -- We only care about skills that consume magicka when used
@@ -156,6 +162,39 @@ local getSpellCost = function(spellId)
     return nil
 end
 
+-- Your effective skill level is affected by your attributes. For every [5] points of Willpower
+-- and for every [10] points of Luck, you gain one effective point onto every skill for purposes
+-- of calculating your magicka refund. -- HotFusion4, MBSP v2.1 README
+local runRefundMagicka = function(pid, skillId)
+    local effectiveSkillLevel = tes3mp.GetSkillBase(pid, skillId)
+
+    -- Willpower's contribution to effective skill level
+    if config['willpowerPointsPerSkillPoint'] ~= nil then
+        local currentWillpower = tes3mp.GetAttributeBase(pid, willpowerAttributeId) +
+            tes3mp.GetAttributeModifier(pid, willpowerAttributeId) -
+            tes3mp.GetAttributeDamage(pid, willpowerAttributeId)
+
+        info('PID #' .. pid .. ' current Willpower is ' .. currentWillpower)
+
+        effectiveSkillLevel = effectiveSkillLevel + currentWillpower / config['willpowerPointsPerSkillPoint']
+    end
+
+    -- Lucks's contribution to effective skill level
+    if config['luckPointsPerSkillPoint'] ~= nil then
+        local currentLuck = tes3mp.GetAttributeBase(pid, luckAttributeId) +
+            tes3mp.GetAttributeModifier(pid, luckAttributeId) -
+            tes3mp.GetAttributeDamage(pid, luckAttributeId)
+
+        info('PID #' .. pid .. ' current Luck is ' .. currentLuck)
+
+        effectiveSkillLevel = effectiveSkillLevel + currentLuck / config['luckPointsPerSkillPoint']
+    end
+
+    effectiveSkillLevel = math.max(0, effectiveSkillLevel)
+
+    info('PID #' .. pid .. ' effective skill level is ' .. effectiveSkillLevel)
+end
+
 local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgress, skillProgressDelta)
     local extraProgress = math.ceil(spellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
     local newProgess = skillProgress + extraProgress
@@ -183,6 +222,9 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
 
     info('PID #' .. pid .. ' cast "' .. selectedSpellId .. '" with base cost ' .. selectedSpellCost )
     info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
+
+    -- Calculate how much magicka to refund
+    runRefundMagicka(pid, skillId)
 
     -- Calculate how much additional progress to give
     -- TODO: Add option to config whether to use the base cost or the adjusted cost
