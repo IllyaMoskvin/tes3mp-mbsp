@@ -156,6 +156,19 @@ local getSpellCost = function(spellId)
     return nil
 end
 
+local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgress, skillProgressDelta)
+    local extraProgress = math.ceil(spellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
+    local newProgess = skillProgress + extraProgress
+
+    info('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress')
+
+    tes3mp.SetSkillProgress(pid, skillId, newProgess) -- save to memory
+    Players[pid].data.skills[skillName].progress = newProgess -- save to disk
+    tes3mp.SendSkills(pid) -- send to all clients
+
+    info('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
+end
+
 customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
     local skillId, skillName, skillProgress, skillProgressDelta = getSkillThatsChanged(pid)
     if skillId == nil then return end
@@ -172,14 +185,6 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
     info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
 
     -- Calculate how much additional progress to give
-    local extraProgress = math.ceil(selectedSpellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
-    local newProgess = skillProgress + extraProgress
-
-    info('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress')
-
-    tes3mp.SetSkillProgress(pid, skillId, newProgess) -- save to memory
-    Players[pid].data.skills[skillName].progress = newProgess -- save to disk
-    tes3mp.SendSkills(pid) -- send to all clients
-
-    info('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
+    -- TODO: Add option to config whether to use the base cost or the adjusted cost
+    runAwardProgress(pid, selectedSpellCost, skillId, skillName, skillProgress, skillProgressDelta)
 end)
