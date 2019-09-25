@@ -45,6 +45,14 @@ local config = {
     spellCostDivisor = 5,
     willpowerPointsPerSkillPoint = 5,
     luckPointsPerSkillPoint = 10,
+    refundScale = {
+        [25] = 0,
+        [50] = 0.125,
+        [75] = 0.25,
+        [100] = 0.5,
+        [200] = 0.75,
+        [300] = 0.875,
+    },
 }
 
 -- We only care about skills that consume magicka when used
@@ -165,7 +173,8 @@ end
 -- Your effective skill level is affected by your attributes. For every [5] points of Willpower
 -- and for every [10] points of Luck, you gain one effective point onto every skill for purposes
 -- of calculating your magicka refund. -- HotFusion4, MBSP v2.1 README
-local runRefundMagicka = function(pid, skillId)
+local runRefundMagicka = function(pid, skillId, baseSpellCost)
+    -- TODO: Should skill buffs and drains affect refunds?
     local effectiveSkillLevel = tes3mp.GetSkillBase(pid, skillId)
 
     -- Willpower's contribution to effective skill level
@@ -193,6 +202,66 @@ local runRefundMagicka = function(pid, skillId)
     effectiveSkillLevel = math.max(0, effectiveSkillLevel)
 
     info('PID #' .. pid .. ' effective skill level is ' .. effectiveSkillLevel)
+
+    -- Figure out where we fall within the refund thresholds
+    local prevSkillThreshold
+    local prevRefundProportion
+
+    local nextSkillThreshold
+    local nextRefundProportion
+
+    for currentSkillThreshold, currentRefundProportion in pairs(config['refundScale']) do
+        if (currentSkillThreshold < effectiveSkillLevel) then
+            prevSkillThreshold = currentSkillThreshold
+            prevRefundProportion = currentRefundProportion
+        elseif (nextSkillThreshold == nil) then
+            nextSkillThreshold = currentSkillThreshold
+            nextRefundProportion = currentRefundProportion
+            break
+        end
+    end
+
+    -- Determine what proportion of the spell cost to refund
+    local effectiveRefundProportion
+
+    if prevSkillThreshold == nil then
+        -- Skill level is below the lowest defined in config
+        info('PID #' .. pid .. ' skill too low for refund')
+        return
+    else
+        if nextSkillThreshold == nil then
+            -- Skill level is above the highest defined in config
+            effectiveRefundProportion = prevSkillThreshold
+        else
+            -- Skill level is between two thresholds
+            local progressTowardsNextThreshold = (effectiveSkillLevel - prevSkillThreshold) / (nextSkillThreshold - prevSkillThreshold)
+            effectiveRefundProportion = prevRefundProportion + (nextRefundProportion - prevRefundProportion) * progressTowardsNextThreshold
+        end
+    end
+
+    info('PID #' .. pid .. ' effective refund proportion is ' .. effectiveRefundProportion)
+
+    local refundedSpellCost = baseSpellCost * effectiveRefundProportion
+
+    info('PID #' .. pid .. ' should be refunded ' .. refundedSpellCost .. ' magicka')
+
+    -- All spells should cost at least one magicka
+    if baseSpellCost - refundedSpellCost < 1 then
+        info('PID #' .. pid .. ' was refused magicka refund for cantrip')
+        return
+    end
+
+    local newMagicka = tes3mp.GetMagickaCurrent(pid) + refundedSpellCost
+    local maxMagicka = tes3mp.GetMagickaBase(pid)
+
+    if newMagicka > maxMagicka then
+        info('PID #' .. pid .. ' had refund capped to max magicka of ' .. maxMagicka)
+        newMagicka = maxMagicka
+    end
+
+    tes3mp.SetMagickaCurrent(pid, newMagicka) -- save to memory
+    Players[pid].data.stats.magickaCurrent = newMagicka -- save to disk
+    tes3mp.SendStatsDynamic(pid) -- send to all clients
 end
 
 local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgress, skillProgressDelta)
@@ -224,7 +293,7 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
     info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
 
     -- Calculate how much magicka to refund
-    runRefundMagicka(pid, skillId)
+    runRefundMagicka(pid, skillId, selectedSpellCost)
 
     -- Calculate how much additional progress to give
     -- TODO: Add option to config whether to use the base cost or the adjusted cost
