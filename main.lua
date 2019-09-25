@@ -36,6 +36,11 @@ local function readfile(path)
     return content
 end
 
+-- TODO: Use DataManger to expose this config
+local config = {
+    spellCostDivisor = 5,
+}
+
 -- We only care about skills that consume magicka when used
 local trackedSkillNames = {
    "Destruction",
@@ -167,8 +172,7 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
     info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
 
     -- Calculate how much additional progress to give
-    -- TODO: Make the `5` configurable!
-    local extraProgress = math.ceil(selectedSpellCost / 5 * skillProgressDelta) - skillProgressDelta
+    local extraProgress = math.ceil(selectedSpellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
     local newProgess = skillProgress + extraProgress
 
     info('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress')
