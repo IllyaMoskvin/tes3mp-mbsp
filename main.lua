@@ -176,8 +176,9 @@ end
 -- and for every [10] points of Luck, you gain one effective point onto every skill for purposes
 -- of calculating your magicka refund. -- HotFusion4, MBSP v2.1 README
 local runRefundMagicka = function(pid, skillId, baseSpellCost)
-    -- TODO: Should skill buffs and drains affect refunds?
-    local effectiveSkillLevel = tes3mp.GetSkillBase(pid, skillId)
+    local effectiveSkillLevel = tes3mp.GetSkillBase(pid, skillId) +
+            tes3mp.GetSkillModifier(pid, skillId) -
+            tes3mp.GetSkillDamage(pid, skillId)
 
     -- Willpower's contribution to effective skill level
     if config['willpowerPointsPerSkillPoint'] ~= nil then
