@@ -41,6 +41,8 @@ local luckAttributeId = tes3mp.GetAttributeId('Luck')
 
 -- TODO: Use DataManger to expose this config
 local config = {
+    enableMagickaRefund = true,
+    enableProgressReward = true,
     spellCostDivisor = 5,
     willpowerPointsPerSkillPoint = 5,
     luckPointsPerSkillPoint = 10,
@@ -292,9 +294,13 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
     info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
 
     -- Calculate how much magicka to refund
-    runRefundMagicka(pid, skillId, selectedSpellCost)
+    if config['enableMagickaRefund'] then
+        runRefundMagicka(pid, skillId, selectedSpellCost)
+    end
 
     -- Calculate how much additional progress to give
     -- TODO: Add option to config whether to use the base cost or the adjusted cost
-    runAwardProgress(pid, selectedSpellCost, skillId, skillName, skillProgress, skillProgressDelta)
+    if config['enableProgressReward'] then
+        runAwardProgress(pid, selectedSpellCost, skillId, skillName, skillProgress, skillProgressDelta)
+    end
 end)
