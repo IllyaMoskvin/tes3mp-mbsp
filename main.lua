@@ -43,6 +43,7 @@ local luckAttributeId = tes3mp.GetAttributeId('Luck')
 local config = {
     enableMagickaRefund = true,
     enableProgressReward = true,
+    useCostAfterRefundForProgress = true,
     spellCostDivisor = 5,
     willpowerPointsPerSkillPoint = 5,
     luckPointsPerSkillPoint = 10,
@@ -228,7 +229,7 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
     if prevSkillThreshold == nil then
         -- Skill level is below the lowest defined in config
         info('PID #' .. pid .. ' skill too low for refund')
-        return
+        return baseSpellCost
     else
         if nextSkillThreshold == nil then
             -- Skill level is above the highest defined in config
@@ -249,7 +250,7 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
     -- All spells should cost at least one magicka
     if baseSpellCost - refundedSpellCost < 1 then
         info('PID #' .. pid .. ' was refused magicka refund for cantrip')
-        return
+        return baseSpellCost
     end
 
     local newMagicka = tes3mp.GetMagickaCurrent(pid) + refundedSpellCost
@@ -263,13 +264,15 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
     tes3mp.SetMagickaCurrent(pid, newMagicka) -- save to memory
     Players[pid].data.stats.magickaCurrent = newMagicka -- save to disk
     tes3mp.SendStatsDynamic(pid) -- send to all clients
+
+    return baseSpellCost - refundedSpellCost
 end
 
 local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgress, skillProgressDelta)
     local extraProgress = math.ceil(spellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
     local newProgess = skillProgress + extraProgress
 
-    info('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress')
+    info('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress for spell cost ' .. spellCost)
 
     tes3mp.SetSkillProgress(pid, skillId, newProgess) -- save to memory
     Players[pid].data.skills[skillName].progress = newProgess -- save to disk
@@ -293,14 +296,20 @@ customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
     info('PID #' .. pid .. ' cast "' .. selectedSpellId .. '" with base cost ' .. selectedSpellCost )
     info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
 
+    -- Might change from base to adjusted depending on config
+    local spellCostForProgress = selectedSpellCost
+
     -- Calculate how much magicka to refund
     if config['enableMagickaRefund'] then
-        runRefundMagicka(pid, skillId, selectedSpellCost)
+        local adjustedSpellCost = runRefundMagicka(pid, skillId, selectedSpellCost)
+
+        if config['useCostAfterRefundForProgress'] then
+            spellCostForProgress = adjustedSpellCost
+        end
     end
 
     -- Calculate how much additional progress to give
-    -- TODO: Add option to config whether to use the base cost or the adjusted cost
     if config['enableProgressReward'] then
-        runAwardProgress(pid, selectedSpellCost, skillId, skillName, skillProgress, skillProgressDelta)
+        runAwardProgress(pid, spellCostForProgress, skillId, skillName, skillProgress, skillProgressDelta)
     end
 end)
