@@ -1,5 +1,4 @@
 -- Helpers for renaming or versioning
-local scriptName = 'mbsp-tes3mp' -- scripts/custom/subdir of this script
 local dataName = 'mbsp' -- data/custom/__data_[dataName].json
 
 -- Helper functions for logging
@@ -95,7 +94,7 @@ if not tes3mp.DoesFilePathExist(pluginSpellFile) then
 
     if not tes3mp.DoesFilePathExist(pluginSpellFileFallback) then
         fatal('Missing ' .. pluginSpellFileFallback)
-        fatal('Please see the mbsp-tes3mp readme for more info')
+        fatal('Please see the TES3MP-MBSP readme for more info')
         tes3mp.StopServer()
     end
 
@@ -107,7 +106,7 @@ local pluginSpells = DataManager.loadData('mbsp', {})
 
 if next(pluginSpells) == nil then
     fatal('Failed to read spell data file. Please file an issue:')
-    fatal('https://github.com/IllyaMoskvin/mbsp-tes3mp/issues')
+    fatal('https://github.com/IllyaMoskvin/tes3mp-mbsp/issues')
     tes3mp.StopServer()
 end
 

@@ -1,4 +1,4 @@
-# MBSP-TES3MP
+# TES3MP-MBSP
 
 A server-side Lua implementation of [Magicka Based Skill Progression](https://www.nexusmods.com/morrowind/mods/44973) slash [Magicka Mastery](https://www.nexusmods.com/morrowind/mods/45058), for [TES3MP](https://tes3mp.com/).
 
@@ -12,9 +12,9 @@ A server-side Lua implementation of [Magicka Based Skill Progression](https://ww
 
 As with all TES3MP server-side mods, this mod does not require players to install anything in order to join your server.
 
-MBSP-TES3MP was tested with [TES3MP v0.7.0-alpha](https://github.com/TES3MP/openmw-tes3mp/releases/tag/0.7.0-alpha), commit hash: 292536439e.
+TES3MP-MBSP was tested with [TES3MP v0.7.0-alpha](https://github.com/TES3MP/openmw-tes3mp/releases/tag/0.7.0-alpha), commit hash: 292536439e.
 
-Consider using MBSP-TES3MP alongside [NCGD-TES3MP](https://github.com/hristoast/ncgd-tes3mp). The two are fully compatible.
+Consider using TES3MP-MBSP alongside [NCGD-TES3MP](https://github.com/hristoast/ncgd-tes3mp). The two are fully compatible.
 
 
 ## Features
@@ -38,7 +38,7 @@ Consider using MBSP-TES3MP alongside [NCGD-TES3MP](https://github.com/hristoast/
     -- DataManager must be require'd before MBSP, like this:
     DataManager = require("custom/DataManager/main")
 
-    require("custom/mbsp-tes3mp/main")
+    require("custom/tes3mp-mbsp/main")
     ```
 
  4. Ensure that `DataManager` loads before this mod as seen above.
@@ -56,13 +56,13 @@ Consider using MBSP-TES3MP alongside [NCGD-TES3MP](https://github.com/hristoast/
 
 ## Known Issues
 
-Please feel free to [open an issue](https://github.com/IllyaMoskvin/mbsp-tes3mp/issues) if you encounter a bug or have ideas about how to fix some of the ones in this list:
+Please feel free to [open an issue](https://github.com/IllyaMoskvin/tes3mp-mbsp/issues) if you encounter a bug or have ideas about how to fix some of the ones in this list:
 
  * Developed with TES3MP [v0.7.0-alpha](https://github.com/TES3MP/openmw-tes3mp/releases/tag/0.7.0-alpha), commit hash: 292536439e. Only the most recent version of TES3MP will be supported. If a new version comes out and this mod is incompatible with it, please open an issue.
 
  * Scripted spell mods will not be supported. There's too much variation in how scripted spells might be implemented.
 
- * Unlike [Magicka Mastery](https://www.nexusmods.com/morrowind/mods/45058), this mod cannot award experience for failed spells. If you can figure out a way to do this cleanly, or at least in a way that doesn't impact performance too much, please [submit a pull request](https://github.com/IllyaMoskvin/mbsp-tes3mp/pulls).
+ * Unlike [Magicka Mastery](https://www.nexusmods.com/morrowind/mods/45058), this mod cannot award experience for failed spells. If you can figure out a way to do this cleanly, or at least in a way that doesn't impact performance too much, please [submit a pull request](https://github.com/IllyaMoskvin/tes3mp-mbsp/pulls).
 
  * When the script awards extra skill progress, it's possible that the player will end up with more than 100% progress needed to trigger a skill increase. The skill increase will happen the next time the player gains progress in that skill.
 
@@ -89,7 +89,7 @@ Additional thanks to urm and others at the [#scripting_help](https://discord.gg/
 
 This readme was modeled after [NCGD-TES3MP](https://github.com/hristoast/ncgd-tes3mp).
 
-MBSP-TES3MP is an adaptation of the following mods:
+TES3MP-MBSP is an adaptation of the following mods:
 
  * [Magicka Based Skill Progression](http://mw.modhistory.com/download-35-12364) by HotFusion4, and its [ncgdMW Compatility Version](https://www.nexusmods.com/morrowind/mods/44973) by Greywander
  * [Magicka Mastery](https://www.nexusmods.com/morrowind/mods/45058) by MageKing17, and its [MWSE Lua port](https://github.com/MWSE/MWSE/issues/116#issuecomment-421794877) by Greatness7
