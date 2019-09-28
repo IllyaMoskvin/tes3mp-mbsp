@@ -79,13 +79,27 @@ local recentSpells = {}
 
 -- Load custom spells from TES3MP's recordstore
 local customSpells = {}
-local customSpellData = jsonInterface.load('recordstore/spell.json')
 
-if customSpellData ~= nil then
-    for spellId, spellData in pairs(customSpellData['generatedRecords']) do
-        customSpells[spellId] = spellData['cost']
+local setCustomSpells = function()
+    local customSpellData = jsonInterface.load('recordstore/spell.json')
+
+    if customSpellData ~= nil then
+        for spellId, spellData in pairs(customSpellData['generatedRecords']) do
+            customSpells[spellId] = spellData['cost']
+        end
     end
 end
+
+setCustomSpells()
+
+-- Update custom spell cost list whenever a player creates a new spell
+customEventHooks.registerHandler("OnRecordDynamic", function(eventStatus, pid)
+    local recordNumericalType = tes3mp.GetRecordType(pid)
+    local storeType = string.lower(tableHelper.getIndexByValue(enumerations.recordType, recordNumericalType))
+    if storeType == "spell" then
+        setCustomSpells()
+    end
+end)
 
 -- Load pre-generated list of spells from plugins
 local pluginSpellFile = tes3mp.GetDataPath() .. "/" .. DataManager.getDataPath(dataName)
