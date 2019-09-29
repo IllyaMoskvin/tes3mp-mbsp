@@ -132,6 +132,8 @@ end
 local getSkillThatsChanged = function(pid)
     if Players[pid].data.skills == nil then return nil end
 
+    local skillData = {}
+
     for skillName, skillId in pairs(trackedSkills) do
         local oldProgress = Players[pid].data.skills[skillName].progress
         local newProgress = tes3mp.GetSkillProgress(pid, skillId)
@@ -139,6 +141,11 @@ local getSkillThatsChanged = function(pid)
         if oldProgress < newProgress then
             return skillId, skillName, oldProgress, (newProgress - oldProgress)
         end
+
+        skillData[skillName] = {
+            oldProgress = oldProgress,
+            newProgress = newProgress,
+        }
     end
 
     -- Check if the skill increased
@@ -146,9 +153,10 @@ local getSkillThatsChanged = function(pid)
         local oldSkill = Players[pid].data.skills[skillName].base
         local newSkill = tes3mp.GetSkillBase(pid, skillId)
 
-        -- Here, we assume that all spellcasting skills progress by 1 point
+        -- Here, we assume that all spellcasting skills progress by one point
         -- See OpenCS -> Skills -> [Skill] -> Use value 1
-        if oldSkill < newSkill then
+        -- Progress only gets reset to zero with actual use, not training or skill books
+        if oldSkill < newSkill and skillData[skillName].newProgress == 0 then
             return skillId, skillName, 0, 1
         end
     end
