@@ -64,11 +64,21 @@ Please feel free to [open an issue](https://github.com/IllyaMoskvin/tes3mp-mbsp/
 
  * Unlike [Magicka Mastery](https://www.nexusmods.com/morrowind/mods/45058), this mod cannot award experience for failed spells. If you can figure out a way to do this cleanly, or at least in a way that doesn't impact performance too much, please [submit a pull request](https://github.com/IllyaMoskvin/tes3mp-mbsp/pulls).
 
- * When the script awards extra skill progress, it's possible that the player will end up with more than 100% progress needed to trigger a skill increase. The skill increase will happen the next time the player gains progress in that skill.
+Additionally, skill increases are tricky. Here's the default behavior in OpenMW:
 
- * Extra skill progress does not roll over when the skill is increased. It gets reset back to zero.
+ * Whenever a skill increase is triggered by using that skill (rather than training or skill books), its progress gets reset back to zero. In other words, there's no "rollover" for any extra progress beyond that which was needed to reach the progress requirement for that skill increase. It is lost.
 
- * If casting a spell causes the skill to be increased, that spell will not not be eligible for cost reduction and will not grant additional experience. (Unlike the two above, this bug seems fixable.)
+ * The only way to trigger the game to check for whether there is sufficient progress for a skill increase is to actually use the skill. Any artificial modification of the skill progress will not trigger this check.
+
+Practically, here's what that means for this script:
+
+ * When this script awards extra skill progress for an expensive spell, it's possible that the player will temporarily end up with more than 100% progress needed to trigger a skill increase. The skill increase will happen the next time the player casts a spell governed by that skill.
+
+ * When that skill does get increased, any "extra" progress on record will be lost. As mentioned, this is expected.
+
+ * This script contains a work-around to ensure that the spell that triggered the skill to be increased will still get its full allotment of experience and magicka refund.
+
+Essentially, you'll lag behind on casting-based skill increases by one spell casting, but it shouldn't affect anything.
 
 
 ## Credits
@@ -85,7 +95,7 @@ The following libraries are also bundled with this code:
  * [David Kolf's JSON module for Lua 5.1/5.2k (v2.5)](https://github.com/LuaDist/dkjson)
  * [lua-struct by Iryont](https://github.com/iryont/lua-struct)
 
-Additional thanks to urm and others at the [#scripting_help](https://discord.gg/SZjnYCh) channel of the TES3MP Discord.
+Additional thanks to urm, johnnyhostile, and others at the [#scripting_help](https://discord.gg/SZjnYCh) channel of the TES3MP Discord.
 
 This readme was modeled after [NCGD-TES3MP](https://github.com/hristoast/ncgd-tes3mp).
 
