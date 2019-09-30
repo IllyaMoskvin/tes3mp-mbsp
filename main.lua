@@ -1,5 +1,5 @@
 -- Paths to config and data files
-local dataName = 'mbsp' -- data/custom/__data_[dataName].json
+local dataPath = 'custom/__data_mbsp.json'
 local configPath = 'custom/__config_mbsp.json'
 
 -- Load config with default fallback
@@ -144,7 +144,7 @@ customEventHooks.registerHandler("OnRecordDynamic", function(eventStatus, pid)
 end)
 
 -- Load pre-generated list of spells from plugins
-local pluginSpellFile = tes3mp.GetDataPath() .. "/" .. DataManager.getDataPath(dataName)
+local pluginSpellFile = tes3mp.GetDataPath() .. "/" .. dataPath
 local pluginSpellFileFallback = getScriptPath() .. 'spells/vanilla.json'
 
 if not tes3mp.DoesFilePathExist(pluginSpellFile) then
@@ -153,15 +153,24 @@ if not tes3mp.DoesFilePathExist(pluginSpellFile) then
 
     if not tes3mp.DoesFilePathExist(pluginSpellFileFallback) then
         fatal('Missing ' .. pluginSpellFileFallback)
-        fatal('Please see the TES3MP-MBSP readme for more info')
+        fatal('Please see the TES3MP-MBSP readme for more info.')
         tes3mp.StopServer()
     end
 
-    local dkjson = require('dkjson')
-    DataManager.saveData(dataName, dkjson.decode(readfile(pluginSpellFileFallback)))
+    -- Copy spells/vanilla.json into data/custom/__data_mbsp.json
+    local pluginSpellFileHandle = io.open(pluginSpellFile, "w+b")
+
+    if pluginSpellFileHandle == nil then
+        fatal('Cannot open ' .. pluginSpellFile .. ' for writing.')
+        fatal('Try creating it manually? Check TES3MP-MBSP readme.')
+        tes3mp.StopServer()
+    end
+
+    pluginSpellFileHandle:write(readfile(pluginSpellFileFallback))
+    pluginSpellFileHandle:close()
 end
 
-local pluginSpells = DataManager.loadData('mbsp', {})
+local pluginSpells = jsonInterface.load(dataPath)
 
 if next(pluginSpells) == nil then
     fatal('Failed to read spell data file. Please file an issue:')

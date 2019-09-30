@@ -19,7 +19,6 @@ Consider using TES3MP-MBSP alongside [NCGD-TES3MP](https://github.com/hristoast/
 
 ## Features
 
- * Requires [DataManager](https://github.com/tes3mp-scripts/DataManager)!
  * More expensive spells give more experience.
  * Spells cost less Magicka to cast the more skilled you are.
  * Supports custom spells made via [Spellmakers](https://en.uesp.net/wiki/Morrowind:Spellmakers).
@@ -28,22 +27,15 @@ Consider using TES3MP-MBSP alongside [NCGD-TES3MP](https://github.com/hristoast/
 
 ## Installation
 
- 1. Clone or download [DataManager](https://github.com/tes3mp-scripts/DataManager) into your `CoreScripts/scripts/custom/` directory.
+ 1. Clone or download this repo into your `CoreScripts/scripts/custom/` directory.
 
- 2. Place this repo into your `CoreScripts/scripts/custom/` directory. Clone or download it.
-
- 3. Add the following to `CoreScripts/scripts/customScripts.lua`:
+ 2. Add the following to `CoreScripts/scripts/customScripts.lua`:
 
     ```
-    -- DataManager must be require'd before MBSP, like this:
-    DataManager = require("custom/DataManager/main")
-
     require("custom/tes3mp-mbsp/main")
     ```
 
- 4. Ensure that `DataManager` loads before this mod as seen above.
-
- 5. Create the `CoreScripts/data/custom/__data_mbsp.json` spell cost look-up file. Do one of the following:
+ 3. Create the `CoreScripts/data/custom/__data_mbsp.json` spell cost look-up file. Do one of the following:
 
     a. If you are running vanilla (Morrowind, Tribunal, Bloodmoon), you shouldn't need to do anything.
 
@@ -51,7 +43,7 @@ Consider using TES3MP-MBSP alongside [NCGD-TES3MP](https://github.com/hristoast/
 
     c. If you are running other mods that add spells, see below.
 
- 6. (Optional) Run the server once to generate `CoreScripts/data/custom/__config_mbsp.json`. See Configuration.
+ 4. (Optional) Run the server once to generate `CoreScripts/data/custom/__config_mbsp.json`. See Configuration.
 
 
 ## Known Issues
