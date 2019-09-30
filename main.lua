@@ -62,7 +62,7 @@ table.sort(config['refundScale'], function (v1, v2)
 end)
 
 -- Helper functions for logging
-local logPrefix = "[ mbsp ]: "
+local logPrefix = '[ mbsp ]: '
 
 local function dbg(msg)
    tes3mp.LogMessage(enumerations.log.VERBOSE, logPrefix .. msg)
@@ -82,15 +82,15 @@ end
 
 -- https://stackoverflow.com/a/23535333
 local getScriptPath = function()
-   local str = debug.getinfo(2, "S").source:sub(2)
-   return str:match("(.*[/\\])")
+   local str = debug.getinfo(2, 'S').source:sub(2)
+   return str:match('(.*[/\\])')
 end
 
 -- https://stackoverflow.com/a/31857671
 local function readfile(path)
-    local file = io.open(path, "rb") -- r read mode and b binary mode
+    local file = io.open(path, 'rb') -- r read mode and b binary mode
     if not file then return nil end
-    local content = file:read "*a" -- *a or *all reads the whole file
+    local content = file:read '*a' -- *a or *all reads the whole file
     file:close()
     return content
 end
@@ -101,12 +101,12 @@ local luckAttributeId = tes3mp.GetAttributeId('Luck')
 
 -- We only care about skills that consume magicka when used
 local trackedSkillNames = {
-   "Destruction",
-   "Alteration",
-   "Illusion",
-   "Conjuration",
-   "Mysticism",
-   "Restoration",
+   'Destruction',
+   'Alteration',
+   'Illusion',
+   'Conjuration',
+   'Mysticism',
+   'Restoration',
 }
 
 -- Cache skill IDs for performance
@@ -135,16 +135,16 @@ end
 setCustomSpells()
 
 -- Update custom spell cost list whenever a player creates a new spell
-customEventHooks.registerHandler("OnRecordDynamic", function(eventStatus, pid)
+customEventHooks.registerHandler('OnRecordDynamic', function(eventStatus, pid)
     local recordNumericalType = tes3mp.GetRecordType(pid)
     local storeType = string.lower(tableHelper.getIndexByValue(enumerations.recordType, recordNumericalType))
-    if storeType == "spell" then
+    if storeType == 'spell' then
         setCustomSpells()
     end
 end)
 
 -- Load pre-generated list of spells from plugins
-local pluginSpellFile = tes3mp.GetDataPath() .. "/" .. dataPath
+local pluginSpellFile = tes3mp.GetDataPath() .. '/' .. dataPath
 local pluginSpellFileFallback = getScriptPath() .. 'spells/vanilla.json'
 
 if not tes3mp.DoesFilePathExist(pluginSpellFile) then
@@ -158,7 +158,7 @@ if not tes3mp.DoesFilePathExist(pluginSpellFile) then
     end
 
     -- Copy spells/vanilla.json into data/custom/__data_mbsp.json
-    local pluginSpellFileHandle = io.open(pluginSpellFile, "w+b")
+    local pluginSpellFileHandle = io.open(pluginSpellFile, 'w+b')
 
     if pluginSpellFileHandle == nil then
         fatal('Cannot open ' .. pluginSpellFile .. ' for writing.')
@@ -358,7 +358,7 @@ local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgr
     info('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
 end
 
-customEventHooks.registerValidator("OnPlayerSkill", function(eventStatus, pid)
+customEventHooks.registerValidator('OnPlayerSkill', function(eventStatus, pid)
     local skillId, skillName, skillProgress, skillProgressDelta = getSkillThatsChanged(pid)
     if skillId == nil then return end
     if skillName == nil then return end

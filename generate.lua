@@ -1,8 +1,9 @@
-local dkjson = require("lib/dkjson")
+local dkjson = require('lib/dkjson')
 local config
 
-require("lib/struct")
-require("lib/espParser")
+local inspect = require('lib/inspect')
+require('lib/struct')
+require('lib/espParser')
 
 -- Check if a file or directory exists in this path
 -- https://stackoverflow.com/a/40195356
@@ -20,31 +21,31 @@ end
 -- Get contents of file
 -- https://stackoverflow.com/a/31857671
 local function readfile(path)
-    local file = io.open(path, "rb") -- r read mode and b binary mode
+    local file = io.open(path, 'rb') -- r read mode and b binary mode
     if not file then return nil end
-    local content = file:read "*a" -- *a or *all reads the whole file
+    local content = file:read '*a' -- *a or *all reads the whole file
     file:close()
     return content
 end
 
 -- Load the config file
-if not exists("generate.json") then
-    print("Cannot find generate.json in current path")
+if not exists('generate.json') then
+    print('Cannot find generate.json in current path')
     os.exit(1)
 end
 
-local config = dkjson.decode(readfile("generate.json"))
+local config = dkjson.decode(readfile('generate.json'))
 
 -- Verify that the config file loaded correctly
 if config == nil then
-    print("Failed to read generate.json")
+    print('Failed to read generate.json')
     os.exit(1)
 end
 
 -- Verify that the files exist
 for i, file in pairs(config['files']) do
     if not exists(file) then
-        print("File not found: ", file)
+        print('File not found: ', file)
         os.exit(1)
     end
 end
@@ -52,7 +53,7 @@ end
 -- Adapted from `parseMiscs` in original `espParser.lua`
 -- https://github.com/JakobCh/tes3mp_scripts/blob/4096203/espParser/scripts/espParser.lua#L333
 function parseSpells(filename)
-    local records = espParser.getRecords(filename, "SPEL")
+    local records = espParser.getRecords(filename, 'SPEL')
 
     if espParser.files[filename] == nil then
         espParser.files[filename] = {}
@@ -61,20 +62,20 @@ function parseSpells(filename)
     espParser.files[filename].spells = {}
 
     local dataTypes = {
-        NAME = {"s", "refId"},
-        FNAM = {"s", "name"},
+        NAME = {'s', 'refId'},
+        FNAM = {'s', 'name'},
         SPDT = {
             {
-                {"i", "type"},
-                {"i", "cost"},
-                {"i", "flags"}
-            }, "data"
+                {'i', 'type'},
+                {'i', 'cost'},
+                {'i', 'flags'}
+            }, 'data'
         }
         -- We don't care about ENAM
     }
 
     for _, record in pairs(records) do
-        local refId = struct.unpack( "s", record:getSubRecordsByName("NAME")[1].data )
+        local refId = struct.unpack( 's', record:getSubRecordsByName('NAME')[1].data )
         espParser.files[filename].spells[refId] = {}
 
         for _, subrecord in pairs(record.subRecords) do
@@ -89,10 +90,10 @@ local spells = {}
 -- Use our modified espParser to load all magic effects
 -- https://github.com/JakobCh/tes3mp_scripts/blob/4096203/espParser/scripts/espParser.lua#L398
 for i, file in pairs(config['files']) do
-    print("Loading " .. file)
+    print('Loading ' .. file)
 
     if not espParser.addEsp(file) then
-        print("Failed to load: " .. file)
+        print('Failed to load: ' .. file)
         os.exit(1)
     end
 
@@ -119,7 +120,7 @@ end
 table.sort(spellIds)
 
 -- Output our spell list to file
-local file = io.open("spells/custom.json", "w+b")
+local file = io.open('spells/custom.json', 'w+b')
 
 if file then
     local content = dkjson.encode(spells, { indent = true, keyorder = spellIds })
@@ -127,4 +128,4 @@ if file then
     file:close()
 end
 
-print("Success! " .. tostring(spellCount) .. " spells written to `spells/custom.json`")
+print('Success! ' .. tostring(spellCount) .. ' spells written to `spells/custom.json`')
