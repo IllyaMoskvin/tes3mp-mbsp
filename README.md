@@ -22,7 +22,7 @@ Consider using TES3MP-MBSP alongside [NCGD-TES3MP](https://github.com/hristoast/
  * More expensive spells give more experience.
  * Spells cost less Magicka to cast the more skilled you are.
  * Supports custom spells made via [Spellmakers](https://en.uesp.net/wiki/Morrowind:Spellmakers).
- * Supports spells added by mods. (Requires some extra steps, see below.)
+ * Supports spells added by mods. (Requires some extra steps, see [Mod Support](#mod-support).)
 
 
 ## Installation
@@ -41,7 +41,7 @@ Consider using TES3MP-MBSP alongside [NCGD-TES3MP](https://github.com/hristoast/
 
     b. If you are running vanilla + Tamriel Rebuilt (v18.09), copy `spells/tr-v18.09.json` into `__data_mbsp.json`.
 
-    c. If you are running other mods that add spells, see below.
+    c. If you are running other mods that add spells, see [Mod Support](#mod-support).
 
  4. (Optional) Run the server once to generate `CoreScripts/data/custom/__config_mbsp.json`. See [Configuration](#configuration).
 
@@ -119,6 +119,64 @@ In general, this script balances things to be easier than MBSP, but harder than 
 ```
 
 
+## Mod Support
+
+If your server is running mods that add spells, you may want to generate a custom spell cost look-up list. If you choose to skip this step, casting those spells will not result in additional experience or a magicka refund. But otherwise, assuming that your `__data_mbsp.json` contains the [vanilla spell list](spells/vanilla.json), everything will function as normal.
+
+If you are using mods that don't add spells, you don't need to do these steps.
+
+The requirements for generating a new spell list are as follows:
+
+ 1. Lua must be installed and accessible via the CLI.
+ 2. The ESP/ESM files required by your server must be reachable from wherever you choose to run the generate script.
+
+Essentially, we need to run [generate.lua](generate.lua) to scan your ESP/ESM files and extract spell IDs and costs.
+
+This might lead to a tricky situation: you need Lua installed to run your server, but the ESP/ESM files required by the server don't actually need to be on that system. So if you are running a dedicated server on some remote host, you will either need to copy the mod files there, or install Lua locally.
+
+Once you've got that figured out, follow these steps:
+
+ 1. Copy `generate.example.json` to `generate.json`:
+
+    ```bash
+    cd tes3mp-mbsp
+    cp generate.example.json generate.json
+    ```
+
+ 2. Update the new `generate.json` with absolute paths to your mods:
+
+    ```json
+    {
+        "files": [
+            "/path/to/Data Files/Morrowind.esm",
+            "/path/to/Data Files/Tribunal.esm",
+            "/path/to/Data Files/Bloodmoon.esm",
+            "/path/to/Data Files/TR_Mainland.esm"
+        ]
+    }
+    ```
+
+ 3. Run `generate.lua` to create `spells/custom.json`:
+
+    ```bash
+    lua generate.lua
+    ```
+
+ 4. Copy `spells/custom.json` into the `CoreScripts/data/custom/__data_mbsp.json` file:
+
+    ```bash
+    cp spells/custom.json ../../../data/custom/__data_mbsp.json
+    ```
+
+ 5. Run your server, cast a modded spell, and check the log. You should see something like this:
+
+     ```
+     [2019-09-30 04:43:36] [INFO]: [Script]: [ mbsp ]: PID #0 cast "foobar" with base cost 42
+     ```
+
+If you see that, then the script successfully detected your modded spell. Everything will work as expected. If you want to see more info, set `logLevel = 0` in your `tes3mp-server-default.cfg` and restart the server.
+
+
 ## Known Issues
 
 Please feel free to [open an issue](https://github.com/IllyaMoskvin/tes3mp-mbsp/issues) if you encounter a bug or have ideas about how to improve this mod.
@@ -128,6 +186,8 @@ Please feel free to [open an issue](https://github.com/IllyaMoskvin/tes3mp-mbsp/
  * Scripted spell mods will not be supported. There's too much variation in how scripted spells might be implemented.
 
  * Unlike [Magicka Mastery](https://www.nexusmods.com/morrowind/mods/45058), this mod cannot award experience for failed spells. If you can figure out a way to do this cleanly, or at least in a way that doesn't impact performance too much, please [submit a pull request](https://github.com/IllyaMoskvin/tes3mp-mbsp/pulls).
+
+ * I haven't tested if OpenCS's `*.omwaddon` files get their spell costs extracted correctly by `generate.lua`.
 
 Additionally, skill increases are tricky. For context, OpenMW default behavior is as follows:
 
