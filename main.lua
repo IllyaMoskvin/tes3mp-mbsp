@@ -1,5 +1,65 @@
--- Helpers for renaming or versioning
+-- Paths to config and data files
 local dataName = 'mbsp' -- data/custom/__data_[dataName].json
+local configPath = 'custom/__config_mbsp.json'
+
+-- Load config with default fallback
+local defaultConfig = {
+    enableMagickaRefund = true,
+    enableProgressReward = true,
+    useCostAfterRefundForProgress = true,
+    spellCostDivisor = 5,
+    willpowerPointsPerSkillPoint = 5,
+    luckPointsPerSkillPoint = 10,
+    refundScale = {
+        {
+            skill = 25,
+            refund = 0,
+        },
+        {
+            skill = 50,
+            refund = 0.125,
+        },
+        {
+            skill = 75,
+            refund = 0.25,
+        },
+        {
+            skill = 100,
+            refund = 0.5,
+        },
+        {
+            skill = 200,
+            refund = 0.75,
+        },
+        {
+            skill = 300,
+            refund = 0.875,
+        },
+    },
+}
+
+local config = jsonInterface.load(configPath)
+
+if config == nil then
+    config = defaultConfig
+
+    jsonInterface.save(configPath, defaultConfig, {
+        'enableMagickaRefund',
+        'enableProgressReward',
+        'useCostAfterRefundForProgress',
+        'spellCostDivisor',
+        'willpowerPointsPerSkillPoint',
+        'luckPointsPerSkillPoint',
+        'refundScale',
+        'skill',
+        'refund',
+    })
+end
+
+-- Ensure `refundScale` is sorted by skill level
+table.sort(config['refundScale'], function (v1, v2)
+    return v1['skill'] < v2['skill']
+end)
 
 -- Helper functions for logging
 local logPrefix = "[ mbsp ]: "
@@ -38,24 +98,6 @@ end
 -- Cache attribute ids for performance
 local willpowerAttributeId = tes3mp.GetAttributeId('Willpower')
 local luckAttributeId = tes3mp.GetAttributeId('Luck')
-
--- TODO: Use DataManger to expose this config
-local config = {
-    enableMagickaRefund = true,
-    enableProgressReward = true,
-    useCostAfterRefundForProgress = true,
-    spellCostDivisor = 5,
-    willpowerPointsPerSkillPoint = 5,
-    luckPointsPerSkillPoint = 10,
-    refundScale = {
-        [25] = 0,
-        [50] = 0.125,
-        [75] = 0.25,
-        [100] = 0.5,
-        [200] = 0.75,
-        [300] = 0.875,
-    },
-}
 
 -- We only care about skills that consume magicka when used
 local trackedSkillNames = {
@@ -235,7 +277,10 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
     local nextSkillThreshold
     local nextRefundProportion
 
-    for currentSkillThreshold, currentRefundProportion in pairs(config['refundScale']) do
+    for _, skillPair in pairs(config['refundScale']) do
+        local currentSkillThreshold = skillPair['skill']
+        local currentRefundProportion = skillPair['refund']
+
         if (currentSkillThreshold < effectiveSkillLevel) then
             prevSkillThreshold = currentSkillThreshold
             prevRefundProportion = currentRefundProportion
