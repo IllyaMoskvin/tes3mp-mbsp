@@ -259,7 +259,7 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
             tes3mp.GetAttributeModifier(pid, willpowerAttributeId) -
             tes3mp.GetAttributeDamage(pid, willpowerAttributeId)
 
-        info('PID #' .. pid .. ' current Willpower is ' .. currentWillpower)
+        dbg('PID #' .. pid .. ' current Willpower is ' .. currentWillpower)
 
         effectiveSkillLevel = effectiveSkillLevel + currentWillpower / config['willpowerPointsPerSkillPoint']
     end
@@ -270,14 +270,14 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
             tes3mp.GetAttributeModifier(pid, luckAttributeId) -
             tes3mp.GetAttributeDamage(pid, luckAttributeId)
 
-        info('PID #' .. pid .. ' current Luck is ' .. currentLuck)
+        dbg('PID #' .. pid .. ' current Luck is ' .. currentLuck)
 
         effectiveSkillLevel = effectiveSkillLevel + currentLuck / config['luckPointsPerSkillPoint']
     end
 
     effectiveSkillLevel = math.max(0, effectiveSkillLevel)
 
-    info('PID #' .. pid .. ' effective skill level is ' .. effectiveSkillLevel)
+    dbg('PID #' .. pid .. ' effective skill level is ' .. effectiveSkillLevel)
 
     -- Figure out where we fall within the refund thresholds
     local prevSkillThreshold
@@ -305,7 +305,7 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
 
     if prevSkillThreshold == nil then
         -- Skill level is below the lowest defined in config
-        info('PID #' .. pid .. ' skill too low for refund')
+        dbg('PID #' .. pid .. ' skill too low for refund')
         return baseSpellCost
     else
         if nextSkillThreshold == nil then
@@ -318,15 +318,15 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
         end
     end
 
-    info('PID #' .. pid .. ' effective refund proportion is ' .. effectiveRefundProportion)
+    dbg('PID #' .. pid .. ' effective refund proportion is ' .. effectiveRefundProportion)
 
     local refundedSpellCost = baseSpellCost * effectiveRefundProportion
 
-    info('PID #' .. pid .. ' should be refunded ' .. refundedSpellCost .. ' magicka')
+    dbg('PID #' .. pid .. ' should be refunded ' .. refundedSpellCost .. ' magicka')
 
     -- All spells should cost at least one magicka
     if baseSpellCost - refundedSpellCost < 1 then
-        info('PID #' .. pid .. ' was refused magicka refund for cantrip')
+        dbg('PID #' .. pid .. ' was refused magicka refund for cantrip')
         return baseSpellCost
     end
 
@@ -334,7 +334,7 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
     local maxMagicka = tes3mp.GetMagickaBase(pid)
 
     if newMagicka > maxMagicka then
-        info('PID #' .. pid .. ' had refund capped to max magicka of ' .. maxMagicka)
+        dbg('PID #' .. pid .. ' had refund capped to max magicka of ' .. maxMagicka)
         newMagicka = maxMagicka
     end
 
@@ -349,13 +349,13 @@ local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgr
     local extraProgress = math.ceil(spellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
     local newProgess = skillProgress + extraProgress
 
-    info('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress for spell cost ' .. spellCost)
+    dbg('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress for spell cost ' .. spellCost)
 
     tes3mp.SetSkillProgress(pid, skillId, newProgess) -- save to memory
     Players[pid].data.skills[skillName].progress = newProgess -- save to disk
     tes3mp.SendSkills(pid) -- send to all clients
 
-    info('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
+    dbg('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
 end
 
 customEventHooks.registerValidator('OnPlayerSkill', function(eventStatus, pid)
@@ -371,7 +371,7 @@ customEventHooks.registerValidator('OnPlayerSkill', function(eventStatus, pid)
     if selectedSpellCost == nil then return end
 
     info('PID #' .. pid .. ' cast "' .. selectedSpellId .. '" with base cost ' .. selectedSpellCost )
-    info('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
+    dbg('PID #' .. pid .. ' raised "' .. skillName .. '" by ' .. skillProgressDelta )
 
     -- Might change from base to adjusted depending on config
     local spellCostForProgress = selectedSpellCost
