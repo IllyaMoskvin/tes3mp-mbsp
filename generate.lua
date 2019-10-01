@@ -44,7 +44,6 @@ HISTORY:
 local dkjson = require('lib/dkjson')
 local config
 
-local inspect = require('lib/inspect')
 require('lib/struct')
 require('lib/espParser')
 
