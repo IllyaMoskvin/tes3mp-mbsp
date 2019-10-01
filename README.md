@@ -170,9 +170,9 @@ Once you've got that figured out, follow these steps:
 
  5. Run your server, cast a modded spell, and check the log. You should see something like this:
 
-     ```
-     [2019-09-30 04:43:36] [INFO]: [Script]: [ mbsp ]: PID #0 cast "foobar" with base cost 42
-     ```
+    ```
+    [2019-09-30 04:43:36] [INFO]: [Script]: [ mbsp ]: PID #0 cast "foobar" with base cost 42
+    ```
 
 If you see that, then the script successfully detected your modded spell. Everything will work as expected. If you want to see more info, set `logLevel = 0` in your `tes3mp-server-default.cfg` and restart the server.
 
@@ -245,3 +245,18 @@ File credits from MBSP via the ncgdMW Compatibility Version:
  * Fix for multiple calls suggested by Galsiah
  * Aragorn was the first person to notice the mis-assigned spell sounds in the CS
  * All scripters owe thanks to GhanBuriGhan from his canonical Morrowind Scripting For Dummies
+
+
+## Permissions
+
+The two scripts I created ([main.lua](main.lua) and [generate.lua](generate.lua)) both follow the [MIT License](https://en.wikipedia.org/wiki/MIT_License). You may do with them whatever you wish, including but not limited to using them as a basis for your own scripts, and redistributing them elsewhere.
+
+As a courtesy, if you release your work, please consider doing the following:
+
+ 1. Link back to this repo: https://github.com/IllyaMoskvin/tes3mp-mbsp
+
+ 2. In your credits, acknowledge this mod and/or some of the people in the [Credits](#credits) section above. Use your discretion.
+
+Mainly, I just want to make sure that the documentation and provenance of this mod don't get lost, and that if there are any updates, people will know where to find them.
+
+Each of the scripts in the `lib/` directory has its own license terms, which are generally listed in that script's header. For more info about any given script, contact its author.

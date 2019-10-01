@@ -20,9 +20,13 @@
 
     ~~~~~~~~
 
-    Modified by Illya Moskvin to remove dependency on TES3MP.
-    Further modified to only extract "SPEL" records.
+    Jakob has given permission for this script to be used by and bundled with TES3MP-MBSP.
+    https://github.com/IllyaMoskvin/tes3mp-mbsp
+
+    It has been modified by Illya Moskvin to work outside TES3MP.
+    It has been further modified to only extract "SPEL" records.
     No modifications were made to the description above.
+    For usage rights, contact Jakob.
 ]]
 
 -- Add this to whatever requires espParser
