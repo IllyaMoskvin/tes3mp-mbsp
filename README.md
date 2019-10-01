@@ -63,7 +63,7 @@ In general, this script balances things to be easier than MBSP, but harder than 
   // Set to `false` to use the base spell cost for calculating skill
   // progress, instead of the adjusted spell cost.
   //
-  // FYI: Magicka Mastery uses base cost, but MBSP uses adjusted cost.
+  // FYI: MM uses base cost, but MBSP uses adjusted cost.
   "useCostAfterRefundForProgress":true,
 
   // Skill progression is the magicka cost divided by 5, so casting
@@ -75,7 +75,7 @@ In general, this script balances things to be easier than MBSP, but harder than 
   // Remember to take `useCostAfterRefundForProgress` into account.
   // You are always guaranteed at least one progress point.
   //
-  // FYI: Magicka Mastery sets this to 5, and MBSP sets this to 15.
+  // FYI: MM sets this to 5, and MBSP sets this to 15.
   "spellCostDivisor":5,
 
   // Attributes contribute to effective skill level when calculating
@@ -96,6 +96,8 @@ In general, this script balances things to be easier than MBSP, but harder than 
   // capped at 87.5%
   //
   // Remember that attributes contribute to effective skill level.
+  //
+  // FYI: At 100, MM refunds 50%, and MBSP refunds 66%.
   "refundScale":[{
       "skill":25,
       "refund":0
