@@ -388,15 +388,20 @@ end
 
 local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgress, skillProgressDelta)
     local extraProgress = math.ceil(spellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
-    local newProgess = skillProgress + extraProgress
 
     dbg('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress for spell cost ' .. spellCost)
 
-    tes3mp.SetSkillProgress(pid, skillId, newProgess) -- save to memory
-    Players[pid].data.skills[skillName].progress = newProgess -- save to disk
-    tes3mp.SendSkills(pid) -- send to all clients
+    if extraProgress > 0 then
+        local newProgess = skillProgress + skillProgressDelta + extraProgress
 
-    dbg('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
+        tes3mp.SetSkillProgress(pid, skillId, newProgess) -- save to memory
+        Players[pid].data.skills[skillName].progress = newProgess -- save to disk
+        tes3mp.SendSkills(pid) -- send to all clients
+
+        dbg('PID #' .. pid .. ' progress bumped from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
+    else
+        dbg('PID #' .. pid .. ' progress naturally rose to from ' .. skillProgress .. ' to ' .. tes3mp.GetSkillProgress(pid, skillId))
+    end
 end
 
 customEventHooks.registerValidator('OnPlayerSkill', function(eventStatus, pid)
