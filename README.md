@@ -39,7 +39,7 @@ Consider using TES3MP-MBSP alongside [NCGD-TES3MP](https://github.com/hristoast/
 
     a. If you are running vanilla (Morrowind, Tribunal, Bloodmoon), you shouldn't need to do anything.
 
-    b. If you are running vanilla + Tamriel Rebuilt (v18.09), copy `spells/tr-v18.09.json` into `__data_mbsp.json`.
+    b. If you are running vanilla + Tamriel Rebuilt (v19.12), copy `spells/tr-v19.12.json` into `__data_mbsp.json`.
 
     c. If you are running other mods that add spells, see [Mod Support](#mod-support).
 
