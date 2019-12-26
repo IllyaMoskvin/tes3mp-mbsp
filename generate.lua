@@ -145,7 +145,7 @@ for i, file in pairs(config['files']) do
     for _, spell in pairs(espParser.files[file].spells) do
         -- type: 0 = Spell, see https://en.uesp.net/morrow/tech/mw_esm.txt
         if spell.data.type == 0 then
-            spells[spell.refId] = spell.data.cost
+            spells[spell.refId] = math.floor(spell.data.cost+0.5)
         end
     end
 end
