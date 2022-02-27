@@ -1,6 +1,6 @@
 --[[-------------------------------------------------------------------
 
-TES3MP-MBSP v1.0.0 by Illya Moskvin
+TES3MP-MBSP v1.1.1 by Illya Moskvin
 
 SOURCE:
     https://github.com/IllyaMoskvin/tes3mp-mbsp
@@ -12,7 +12,7 @@ DESCRIPTION:
     player's skill level.
 
 LICENSE:
-    Copyright (c) 2019 Illya Moskvin <https://github.com/IllyaMoskvin>
+    Copyright (c) 2022 Illya Moskvin <https://github.com/IllyaMoskvin>
 
     Permission is hereby granted, free of charge, to any person obtaining
     a copy of this software and associated documentation files (the
@@ -36,6 +36,8 @@ LICENSE:
 
 HISTORY:
     2019-09-30 - v1.0.0 - Initial release
+    2019-12-14 - v1.1.0 - Fix awarding of "base" skill progress
+    2019-12-25 - v1.1.1 - No code changes, added spells/tr-v19.12.json
 
 ]]---------------------------------------------------------------------
 
