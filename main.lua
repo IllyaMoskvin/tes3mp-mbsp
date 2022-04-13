@@ -40,7 +40,7 @@ HISTORY:
     2019-12-25 - v1.1.1 - No code changes, added spells/tr-v19.12.json
 
 ]]---------------------------------------------------------------------
-
+local skillIdCACHE, skillNameCACHE, skillProgressCACHE, skillProgressDeltaCACHE = nil
 -- Paths to config and data files
 local dataPath = 'custom/__data_mbsp.json'
 local configPath = 'custom/__config_mbsp.json'
@@ -232,7 +232,7 @@ local getSkillThatsChanged = function(pid)
         local oldProgress = Players[pid].data.skills[skillName].progress
         local newProgress = tes3mp.GetSkillProgress(pid, skillId)
 
-        if oldProgress < newProgress then
+        if oldProgress+0.1 < newProgress then
             return skillId, skillName, oldProgress, (newProgress - oldProgress)
         end
 
@@ -389,7 +389,7 @@ local runRefundMagicka = function(pid, skillId, baseSpellCost)
 end
 
 local runAwardProgress = function(pid, spellCost, skillId, skillName, skillProgress, skillProgressDelta)
-    local extraProgress = math.ceil(spellCost / config['spellCostDivisor'] * skillProgressDelta) - skillProgressDelta
+    local extraProgress = spellCost / config['spellCostDivisor'] * skillProgressDelta - skillProgressDelta
 
     dbg('PID #' .. pid .. ' is owed ' .. extraProgress .. ' more progress for spell cost ' .. spellCost)
 
@@ -408,11 +408,19 @@ end
 
 customEventHooks.registerValidator('OnPlayerSkill', function(eventStatus, pid)
     local skillId, skillName, skillProgress, skillProgressDelta = getSkillThatsChanged(pid)
+	skillIdCACHE, skillNameCACHE, skillProgressCACHE, skillProgressDeltaCACHE = skillId, skillName, skillProgress, skillProgressDelta
     if skillId == nil then return end
     if skillName == nil then return end
     if skillProgress == nil then return end
     if skillProgressDelta == nil then return end
+end)
 
+customEventHooks.registerHandler('OnPlayerSkill', function(eventStatus, pid)
+	local skillId, skillName, skillProgress, skillProgressDelta = skillIdCACHE, skillNameCACHE, skillProgressCACHE, skillProgressDeltaCACHE
+    if skillId == nil then return end
+    if skillName == nil then return end
+    if skillProgress == nil then return end
+    if skillProgressDelta == nil then return end
     local selectedSpellId = Players[pid].data.miscellaneous.selectedSpell
     local selectedSpellCost = getSpellCost(selectedSpellId)
 
